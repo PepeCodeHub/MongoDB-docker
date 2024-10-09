@@ -1,34 +1,30 @@
 #!/bin/bash
+set -ebui
 
 # Wait for MongoDB to start
-until mongosh --eval "print(\"Waiting for connections\")" >/dev/null 2>&1; do
-    echo "Waiting for MongoDB to start..."
-    sleep 5
+until mongosh --eval "print(\"waited for connection\")"; do
+  sleep 2
 done
 
-echo "MongoDB is up and running!"
+# Create the database and a dummy collection
+mongosh <<EOF
+use ${DB_NAME};
 
-# Authenticate as root or create the root user
-mongosh -- "
-    db = db.getSiblingDB('admin');
-    if (!db.auth('$MONGO_INITDB_ROOT_USERNAME', '$MONGO_INITDB_ROOT_PASSWORD')) {
-        print('Root user not found. Creating root user...');
-        db.createUser({
-            user: '$MONGO_INITDB_ROOT_USERNAME',
-            pwd: '$MONGO_INITDB_ROOT_PASSWORD',
-            roles: [{ role: 'root', db: 'admin' }]
-        });
-        print('Root user created successfully.');
-    } else {
-        print('Root user exists, skipping creation.');
-    }
+# Create a new user with read and write access
+db.createUser({
+  user: "${DB_USERNAME}",
+  pwd: "${DB_USER_PASSWORD}",
+  roles: [
+    { role: "readWrite", db: "${DB_NAME}" }
+  ]
+});
 
-    // Create the application user
-    db = db.getSiblingDB('$DB_NAME');
-    db.createUser({
-        user: '$DB_USERNAME',
-        pwd: '$DB_USER_PASSWORD',
-        roles: [{ role: 'readWrite', db: '$DB_NAME' }]
-    });
-    print('Application user created successfully.');
-"
+# Create a dummy collection and insert a document
+db.dummyCollection.insert({
+  name: "Sample Document",
+  description: "This is a dummy document for testing purposes.",
+  createdAt: new Date()
+});
+EOF
+
+echo "Database, user, and dummy collection created successfully."
