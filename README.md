@@ -99,4 +99,8 @@ The `.env` file should contain the following variables:
     make help
     ```
 
+## Docker Hub Link 🐳
+
+The Docker image is available on Docker Hub: [f3an/mongo-docker-db](https://hub.docker.com/repository/docker/f3an/mongo-docker-db/general)
+
 MongoDB in Docker 🌿
