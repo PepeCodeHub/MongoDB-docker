@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ebui
+set -ebux
 
 # Wait for MongoDB to start
 until mongosh --eval "print(\"waited for connection\")"; do
