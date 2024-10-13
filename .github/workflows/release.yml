@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  CreateRelease:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        uses: PepeCodeHub/Workflows/create-release@v1.0.0
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: 'Release ${{ github.ref }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_PAT }}
+
+  PublishRelease:
+    runs-on: ubuntu-latest
+    needs: CreateRelease
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Publish Docker Container
+        uses: PepeCodeHub/Workflows/publish-docker-container@v1.0.0
+        with:
+          docker_image_name: 'mongo-docker-db'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
